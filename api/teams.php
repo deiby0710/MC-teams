@@ -23,33 +23,21 @@ try {
 
             if (isset($_GET['id'])) {
 
-                $stmt = $pdo->prepare("
-                    SELECT p.*, t.name AS team_name
-                    FROM player p
-                    JOIN team t ON p.team_id = t.id
-                    WHERE p.id = ?
-                ");
+                $stmt = $pdo->prepare("SELECT * FROM team WHERE id = ?");
                 $stmt->execute([$_GET['id']]);
-                $player = $stmt->fetch();
+                $team = $stmt->fetch();
 
-                if (!$player) {
+                if (!$team) {
                     http_response_code(404);
-                    echo json_encode(['error' => 'Jugador no encontrado']);
+                    echo json_encode(['error' => 'Equipo no encontrado']);
                     break;
                 }
 
-                echo json_encode($player);
+                echo json_encode($team);
 
             } else {
 
-                $stmt = $pdo->query("
-                    SELECT p.id, p.name, p.dorsal, p.position,
-                           t.name AS team_name
-                    FROM player p
-                    JOIN team t ON p.team_id = t.id
-                    ORDER BY p.id ASC
-                ");
-
+                $stmt = $pdo->query("SELECT * FROM team ORDER BY id ASC");
                 echo json_encode($stmt->fetchAll());
             }
 
@@ -61,9 +49,9 @@ try {
 
             if (
                 empty($input['name']) ||
-                empty($input['dorsal']) ||
-                empty($input['position']) ||
-                empty($input['team_id'])
+                empty($input['league']) ||
+                empty($input['city']) ||
+                empty($input['founded_year'])
             ) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Todos los campos son obligatorios']);
@@ -71,19 +59,19 @@ try {
             }
 
             $stmt = $pdo->prepare("
-                INSERT INTO player (name, dorsal, position, team_id)
+                INSERT INTO team (name, league, city, founded_year)
                 VALUES (?, ?, ?, ?)
             ");
 
             $stmt->execute([
                 $input['name'],
-                $input['dorsal'],
-                $input['position'],
-                $input['team_id']
+                $input['league'],
+                $input['city'],
+                $input['founded_year']
             ]);
 
             http_response_code(201);
-            echo json_encode(['message' => 'Jugador creado correctamente']);
+            echo json_encode(['message' => 'Equipo creado correctamente']);
 
             break;
 
@@ -98,26 +86,26 @@ try {
             }
 
             $stmt = $pdo->prepare("
-                UPDATE player
-                SET name = ?, dorsal = ?, position = ?, team_id = ?
+                UPDATE team
+                SET name = ?, league = ?, city = ?, founded_year = ?
                 WHERE id = ?
             ");
 
             $stmt->execute([
                 $input['name'],
-                $input['dorsal'],
-                $input['position'],
-                $input['team_id'],
+                $input['league'],
+                $input['city'],
+                $input['founded_year'],
                 $input['id']
             ]);
 
             if ($stmt->rowCount() === 0) {
                 http_response_code(404);
-                echo json_encode(['error' => 'Jugador no encontrado']);
+                echo json_encode(['error' => 'Equipo no encontrado']);
                 break;
             }
 
-            echo json_encode(['message' => 'Jugador actualizado correctamente']);
+            echo json_encode(['message' => 'Equipo actualizado correctamente']);
 
             break;
 
@@ -129,20 +117,20 @@ try {
 
             if (!$id) {
                 http_response_code(400);
-                echo json_encode(['error' => 'Se requiere el id del jugador']);
+                echo json_encode(['error' => 'Se requiere el id del equipo']);
                 break;
             }
 
-            $stmt = $pdo->prepare("DELETE FROM player WHERE id = ?");
+            $stmt = $pdo->prepare("DELETE FROM team WHERE id = ?");
             $stmt->execute([$id]);
 
             if ($stmt->rowCount() === 0) {
                 http_response_code(404);
-                echo json_encode(['error' => 'Jugador no encontrado']);
+                echo json_encode(['error' => 'Equipo no encontrado']);
                 break;
             }
 
-            echo json_encode(['message' => 'Jugador eliminado correctamente']);
+            echo json_encode(['message' => 'Equipo eliminado correctamente']);
 
             break;
 
