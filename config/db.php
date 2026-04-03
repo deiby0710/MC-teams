@@ -6,8 +6,8 @@ error_reporting(E_ALL);
 // $hostDB = "localhost";
 $hostDB = "db";
 $nameDB = "app_db";
-$userDB = "deiby_alejandro";
-$pwDB   = "deiby";
+$userDB = "user";
+$pwDB   = "password";
 
 try {
     $pdo = new PDO(
